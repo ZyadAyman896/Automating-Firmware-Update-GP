@@ -113,17 +113,13 @@ check_branch() {
 # Reads the version string from the local version.txt file.
 # ==============================================================================
 get_local_version() {
-    local version_path="$REPO_PATH/$VERSION_FILE"
-
+local version_path="$REPO_PATH/$VERSION_FILE"
     if [ ! -f "$version_path" ]; then
-        log "WARN" "Local $VERSION_FILE not found. Treating local version as 0.0.0"
         echo "0.0.0"
         return
     fi
-
-    local ver
-    ver=$(cat "$version_path" | tr -d '[:space:]')
-    log "INFO" "Local version: $ver"
+    # Use a variable to hold the version and echo only that
+    local ver=$(cat "$version_path" | tr -d '[:space:]')
     echo "$ver"
 }
 
@@ -132,28 +128,11 @@ get_local_version() {
 # Fetches remote metadata (no file changes yet) and reads the remote version.
 # ==============================================================================
 get_remote_version() {
-    log "INFO" "Fetching remote metadata..."
-
-    cd "$REPO_PATH" || return 1
-
-    git fetch origin "$BRANCH" 2>>"$LOG_FILE"
-    if [ $? -ne 0 ]; then
-        log "ERROR" "git fetch failed. Cannot check remote version."
-        echo ""
-        return 1
-    fi
-
-    # Read the version file from the remote branch WITHOUT applying the changes locally
-    local ver
-    ver=$(git show "origin/$BRANCH:$VERSION_FILE" 2>>"$LOG_FILE" | tr -d '[:space:]')
-
-    if [ -z "$ver" ]; then
-        log "ERROR" "Could not read remote $VERSION_FILE."
-        echo ""
-        return 1
-    fi
-
-    log "INFO" "Remote version: $ver"
+cd "$REPO_PATH" || return 1
+    # Suppress git output from being captured
+    git fetch origin "$BRANCH" &>/dev/null
+    
+    local ver=$(git show "origin/$BRANCH:$VERSION_FILE" 2>/dev/null | tr -d '[:space:]')
     echo "$ver"
 }
 
