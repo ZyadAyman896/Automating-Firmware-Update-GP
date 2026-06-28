@@ -285,7 +285,10 @@ main() {
 
     # --- Version check ---
     local_version=$(get_local_version)
+    log "INFO" "Local version: $local_version"
+
     remote_version=$(get_remote_version)
+    log "INFO" "Remote version: $remote_version"
 
     # If we couldn't reach remote, just run what we have
     if [ -z "$remote_version" ]; then
